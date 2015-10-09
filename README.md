@@ -2,7 +2,7 @@
 
 By Tri Ahmad Irfan (triahmadirfan@gmail.com)
 
-In this elevator control system I implemented a two classes:
+In this elevator control system I implemented the following classes:
 
 ### class Elevator with attributes:
 
@@ -39,3 +39,6 @@ This method picks a specific person on `floor` with `direction`. Because FCFS (f
 
 * `def step(): Unit`
 This method moves forward one elevator at a time periodically, each step will move the elevator up or down, remove the current floor from the destination set, or change direction. It can be improved so that each move will check if the elevator reached the lowest or highest floor and make it smarter, but I didn't have the chance to implement it.
+
+
+The program can be run by using sbt or scalac, the main file is Main.scala.
