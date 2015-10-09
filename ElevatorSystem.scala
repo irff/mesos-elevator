@@ -2,6 +2,9 @@ package mesoselevator
 
 class ElevatorSystem {
     var elevators: Seq[Elevator] = Seq()
+    var currentElevatorId: Int = 0
+    var minFloor: Int = -1;
+    var maxFloor: Int = 100;
 
     def status(): Seq[(Int, Int, Set[Int])] = {
         elevators map { elevator =>
@@ -12,7 +15,7 @@ class ElevatorSystem {
     def update(id: Int, position: Int, dest: Set[Int]): Unit = {
         elevators = elevators map { elevator =>
             if(elevator.id == id) {
-                new Elevator(id, position, dest)
+                new Elevator(id, position, dest, 0)
             } else {
                 elevator
             }
@@ -38,12 +41,16 @@ class ElevatorSystem {
                     // find nearest elevator (mostly) going up
                     elevator.dest.count(
                         destinationFloor => destinationFloor - elevator.position >= 0
-                    ) >= (elevator.dest.size / 2)
+                    ) > elevator.dest.count(
+                        destinationFloor => destinationFloor - elevator.position <= 0
+                    )
                 } else {
                     // find nearest elevator (mostly) going down
                     elevator.dest.count(
+                        destinationFloor => destinationFloor - elevator.position >= 0
+                    ) < elevator.dest.count(
                         destinationFloor => destinationFloor - elevator.position <= 0
-                    ) >= (elevator.dest.size / 2)
+                    )
                 }
             } filter { elevator =>
                 // only select if they pass the desired floor
@@ -72,12 +79,49 @@ class ElevatorSystem {
             else anyNearestElevators.head
 
         elevators = elevators map { elevator =>
-            if(elevator.id == newElevator.id) new Elevator(elevator.id, floor, elevator.dest)
+            if(elevator.id == newElevator.id) new Elevator(elevator.id, floor, elevator.dest, elevator.direction)
             else elevator
         }
     }
 
     def step(): Unit = {
-        
+        var currentElevator = elevators(currentElevatorId)
+
+        // compute the elevator's direction
+        val newDirection =
+            if(currentElevator.direction == 0) {
+                if(currentElevator.dest.count(
+                    destinationFloor => destinationFloor - currentElevator.position >= 0
+                ) >= (currentElevator.dest.count(
+                    destinationFloor => destinationFloor - currentElevator.position <= 0))
+                ) {
+                    1
+                } else {
+                    -1
+                }
+            } else {
+                currentElevator.direction
+            }
+
+        // move one floor up or down
+        val newPosition =
+            if(newDirection > 0) {
+                currentElevator.position + 1
+            } else {
+                currentElevator.position - 1
+            }
+
+        // when reaching a specific floor, remove that from destination
+        val newDest: Set[Int] = currentElevator.dest - currentElevator.position
+
+        elevators = elevators map { elevator =>
+            if(currentElevatorId == elevator.id) {
+                new Elevator(currentElevatorId, newPosition, newDest, newDirection)
+            } else {
+                elevator
+            }
+        }
+
+        currentElevatorId = (currentElevatorId + 1) % elevators.size
     }
 }
