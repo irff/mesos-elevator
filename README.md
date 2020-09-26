@@ -1,6 +1,5 @@
 # Elevator Control System
 
-By Tri Ahmad Irfan (triahmadirfan@gmail.com)
 
 In this elevator control system I implemented the following classes:
 
